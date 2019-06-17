@@ -19,7 +19,7 @@ class RemoteSecureTradingTest < Test::Unit::TestCase
   def test_successful_authorize
     auth = @gateway.authorize(0, @credit_card, @options)
     assert_success auth
-    assert_equal 'ACCOUNTCHECK', auth.message
+    assert_match /^\d+-\d-\d{5,7}$/, auth.message
   end
 
   def test_failed_authorize
@@ -30,13 +30,13 @@ class RemoteSecureTradingTest < Test::Unit::TestCase
   def test_successful_purchase
     auth = @gateway.purchase(@amount, @credit_card, @options)
     assert_success auth
-    assert_equal 'AUTH', auth.message
+    assert_match /^\d+-\d-\d{5,7}$/, auth.message
   end
 
   def test_failed_purchase
     auth = @gateway.purchase(@amount, @declined_card, @options)
     assert_failure auth
-    assert_equal 'AUTH', auth.message
+    assert_match /^\d+-\d-\d{5,7}$/, auth.message
   end
 
   def test_transcript_scrubbing

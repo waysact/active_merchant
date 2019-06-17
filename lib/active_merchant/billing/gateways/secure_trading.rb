@@ -237,7 +237,7 @@ module ActiveMerchant #:nodoc:
       end
 
       def message_from(response)
-        response[:response_code]
+        response[:transaction_reference].presence || response[:response_code]
       end
 
       def authorization_from(response)
