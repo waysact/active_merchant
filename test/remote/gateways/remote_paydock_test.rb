@@ -68,8 +68,10 @@ class RemotePaydockTest < Test::Unit::TestCase
   end
 
   def test_successful_purchase_with_more_options
+    gateway_id = fixtures(:paydock)[:login]
     options = {
       reference: 'TestReference',
+      gateway_id: gateway_id,
       customer: {
           first_name: 'Joe',
           last_name: 'Blow',

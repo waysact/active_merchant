@@ -340,10 +340,12 @@ module ActiveMerchant #:nodoc:
         unless success_from(response)
           return STANDARD_ERROR_CODE_MAPPING[:processing_error] unless response['error']
 
-          code = response.dig('error', 'code') || response.dig('error', 'details', 0, 'gateway_specific_code')
+          code = response.dig('error', 'code') ||
+                  response.dig('error', 'details', 0, 'gateway_specific_code') ||
+                  response.dig('error', 'message')
           decline_code = response.dig('error', 'decline_code').try(:to_sym) if code == 'card_declined'
 
-          STANDARD_ERROR_CODE_MAPPING[decline_code] || STANDARD_ERROR_CODE_MAPPING[code.to_sym] || code
+          STANDARD_ERROR_CODE_MAPPING[decline_code || code.try(:to_sym)] || code
         end
       end
 
