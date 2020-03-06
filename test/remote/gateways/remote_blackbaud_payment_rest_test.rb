@@ -46,6 +46,14 @@ class RemoteBlackbaudPaymentRestTest < Test::Unit::TestCase
     assert_success response
   end
 
+  def test_failed_purchase_with_credit_card_token_but_without_csc
+    credit_card_stored = @gateway.store(@credit_card, @options)
+    @options[:card_token] = credit_card_stored.authorization
+    response = @gateway.purchase(@amount, nil, @options)
+    assert_failure response
+    assert_match 'CardSecurityCodeIsRequired', response.message
+  end
+
   def test_transcript_scrubbing
     transcript = capture_transcript(@gateway) do
       @gateway.purchase(@amount, @credit_card, @options)
