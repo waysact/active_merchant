@@ -5,7 +5,8 @@ module ActiveMerchant #:nodoc:
     class LitleGateway < Gateway
       SCHEMA_VERSION = '9.12'
 
-      self.test_url = 'https://www.testvantivcnp.com/sandbox/communicator/online'
+      #self.test_url = 'https://www.testvantivcnp.com/sandbox/communicator/online'
+      self.test_url = 'https://payments.vantivprelive.com/vap/communicator/online'
       self.live_url = 'https://payments.vantivcnp.com/vap/communicator/online'
 
       self.supported_countries = ['US']
@@ -118,8 +119,11 @@ module ActiveMerchant #:nodoc:
           add_authentication(doc)
           doc.registerTokenRequest(transaction_attributes(options)) do
             doc.orderId(truncate(options[:order_id], 24))
+
             if payment_method.is_a?(String)
               doc.paypageRegistrationId(payment_method)
+            elsif payment_method.is_a? ApplePayPaymentToken
+              add_apple_payment(doc, payment_method)
             elsif check?(payment_method)
               doc.echeckForToken do
                 doc.accNum(payment_method.account_number)
@@ -223,6 +227,11 @@ module ActiveMerchant #:nodoc:
         add_descriptor(doc, options)
         add_merchant_data(doc, options)
         add_debt_repayment(doc, options)
+        add_processing_type(doc, options)
+      end
+
+      def add_processing_type(doc, options)
+        doc.processingType('initialRecurring') if options[:recurring]
       end
 
       def add_merchant_data(doc, options={})
