@@ -248,8 +248,8 @@ module ActiveMerchant #:nodoc:
           :zip => '00000',
           :country => 'US'
         }
-        options[:billing_address] = options[:billing_address] ||
-          options.dig(:bill_to_defaults, :address) ||
+        options[:billing_address] = options.dig(:bill_to_defaults, :address) ||
+          options[:billing_address] ||
           options[:address] ||
           default_address
         options[:shipping_address] = options[:shipping_address] || options[:address] || default_address
