@@ -1195,6 +1195,11 @@ seerbit:
   private_key: SBTESTPUBK
   public_key: SBTESTSECK
 
+# Working credentials, no need to replace
+simple_pay:
+  secret_key: 6lBgqbXqH1Jpx18aL32aTqJgX8XqJijj
+  merchant_id: P120503
+
 #  Replace with your serial numbers for the skipjack test environment
 skipjack:
   login: X
@@ -1448,8 +1453,8 @@ wirecard_checkout_page:
   paymenttype: IDL
 
 wompi:
-  public_key: PUBLIC_KEY
-  private_key: PRIVATE_KEY
+  public_key: pub_test_rxLNy4HKU8geG0Nh2SJuEknZf5plwB0I
+  private_key: prv_test_whVH12UrRPGHOulesZjNlXFN0yv6GI1I
 
 # Working credentials, no need to replace
 world_net:
