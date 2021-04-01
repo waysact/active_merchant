@@ -38,6 +38,72 @@ module ActiveMerchant #:nodoc:
         commit(:post, 'payment_intents', post, options)
       end
 
+      def commit(method, url, parameters = nil, options ={})
+        add_expand_parameters(parameters, options) if parameters
+        response = api_request(method, url, parameters, options)
+
+        error = response["error"] || response["last_payment_error"]
+        requires_action = response['status'] != 'succeeded' && response['capture_method'] == 'automatic'
+
+        # If a card requires ThreeDS authorization but a payment redirect url is not set
+        # the transaction will return with no errors (as there are no errors) but will require an action
+        # to continue, this is ok when capturing manually, as the purchase is hold until the customer
+        # authorizes it later, but when capturing automatically it will give the wrong perception that the
+        # funds have been captured, thus we FAIL the transaction here if there are no errors + capture_method is
+        # "automatic" + the status of the transaction is anything different than "succeeded".
+        success = !(error || requires_action)
+
+        card = card_from_response(response)
+        avs_code = AVS_CODE_TRANSLATOR["line1: #{card["address_line1_check"]}, zip: #{card["address_zip_check"]}"]
+        cvc_code = CVC_CODE_TRANSLATOR[card["cvc_check"]]
+
+        error_message = response.dig("error", "message") || response.dig("last_payment_error", "message")
+        error_message ||= response["status"].split("_").map(&:capitalize).join(" ") if requires_action
+
+        Response.new(success,
+          success ? "Transaction approved" : error_message,
+          response,
+          :test => response_is_test?(response),
+          :authorization => authorization_from(success, url, method, response),
+          :avs_result => { :code => avs_code },
+          :cvv_result => cvc_code,
+          :emv_authorization => emv_authorization_from_response(response),
+          :error_code => success ? nil : error_code_from(response)
+        )
+      end
+
+      def authorization_from(success, url, method, response)
+        error_response = response["error"] || response["last_payment_error"]
+        return error_response["charge"] if error_response
+
+        if url == "customers"
+          [response['id'], response.dig('sources', 'data').first&.dig('id')].join('|')
+        elsif method == :post && (url.match(/customers\/.*\/cards/) || url.match(/payment_methods\/.*\/attach/))
+          [response["customer"], response["id"]].join("|")
+        else
+          response["id"]
+        end
+      end
+
+      def emv_authorization_from_response(response)
+        error_response = response["error"] || response["last_payment_error"]
+        return error_response["emv_auth_data"] if error_response
+
+        card_from_response(response)["emv_auth_data"]
+      end
+
+      def error_code_from(response)
+        error_response = response["error"] || response["last_payment_error"]
+        return unless error_response
+
+        code = error_response['code']
+        decline_code = error_response['decline_code'] if code == 'card_declined'
+
+        error_code = STANDARD_ERROR_CODE_MAPPING[decline_code]
+        error_code ||= STANDARD_ERROR_CODE_MAPPING[code]
+        error_code
+      end
+
       def show_intent(intent_id, options)
         commit(:get, "payment_intents/#{intent_id}", nil, options)
       end
