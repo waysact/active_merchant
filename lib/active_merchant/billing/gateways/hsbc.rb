@@ -4,12 +4,12 @@ module ActiveMerchant #:nodoc:
       self.test_url = 'https://devcluster.api.p2g.netd2.hsbc.com.hk/cmb-connect-payments-pa-collection-cert-proxy/v1/direct-debits/'
       self.live_url = 'https://example.com/live' # TODO
 
-      self.supported_countries = ['US']
-      self.default_currency = 'USD'
-      self.supported_cardtypes = [:visa, :master, :american_express, :discover]
+      self.supported_countries = ['HK']
+      self.default_currency = 'HKD'
+      self.supported_cardtypes = []
 
-      self.homepage_url = 'http://www.example.net/'
-      self.display_name = 'New Gateway'
+      self.homepage_url = 'https://www.hsbc.com.hk/'
+      self.display_name = 'HSBC'
 
       STANDARD_ERROR_CODE_MAPPING = {}
 
