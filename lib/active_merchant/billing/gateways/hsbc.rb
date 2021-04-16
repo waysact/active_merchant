@@ -82,12 +82,16 @@ module ActiveMerchant #:nodoc:
       end
 
       def parse(body)
-        {}
+        JSON.parse(body)
       end
 
       def commit(action, parameters)
         url = (test? ? test_url : live_url)
-        response = parse(ssl_post(url, post_data(action, parameters)))
+        begin
+          response = parse(ssl_post(url, post_data(action, parameters), headers))
+        rescue ActiveMerchant::ResponseError => e
+          response = parse(e.response.body)
+        end
 
         Response.new(
           success_from(response),
@@ -101,10 +105,20 @@ module ActiveMerchant #:nodoc:
         )
       end
 
+      def headers
+        {
+          'x-hsbc-client-id': @options[:client_id],
+          'x-hsbc-client-secret': @options[:client_secret],
+          'x-hsbc-profile-id': @options[:profile_id],
+        }
+      end
+
       def success_from(response)
+        response['error'].nil?
       end
 
       def message_from(response)
+        response['description'] # TODO: Process success
       end
 
       def authorization_from(response)

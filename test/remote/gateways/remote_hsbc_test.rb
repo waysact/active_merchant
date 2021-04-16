@@ -117,11 +117,16 @@ class RemoteHsbcTest < Test::Unit::TestCase
   end
 
   def test_invalid_login
-    gateway = HsbcGateway.new(login: '', password: '')
+    gateway = HsbcGateway.new(
+      client_id: 'test_failure',
+      client_secret: 'eruliaf_tset',
+      profile_id: 'PC12345678',
+      public_key: 'NONE'
+    )
 
     response = gateway.purchase(@amount, @credit_card, @options)
     assert_failure response
-    assert_match %r{REPLACE WITH FAILED LOGIN MESSAGE}, response.message
+    assert_match "wrong client_id or client_secret", response.message
   end
 
   def test_dump_transcript
