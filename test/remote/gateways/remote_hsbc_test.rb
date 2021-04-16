@@ -37,13 +37,10 @@ class RemoteHsbcTest < Test::Unit::TestCase
     assert_equal 'REPLACE WITH FAILED PURCHASE MESSAGE', response.message
   end
 
-  def test_successful_authorize_and_capture
-    auth = @gateway.authorize(@amount, @credit_card, @options)
-    assert_success auth
-
-    assert capture = @gateway.capture(@amount, auth.authorization)
-    assert_success capture
-    assert_equal 'REPLACE WITH SUCCESS MESSAGE', capture.message
+  def test_successful_authorize
+    response = @gateway.authorize(@amount, @credit_card, @options)
+    assert_success response
+    assert_equal 'REPLACE WITH SUCCESS MESSAGE', response.message
   end
 
   def test_failed_authorize

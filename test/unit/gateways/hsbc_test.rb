@@ -2,7 +2,7 @@ require 'test_helper'
 
 class HsbcTest < Test::Unit::TestCase
   def setup
-    @gateway = HsbcGateway.new(some_credential: 'login', another_credential: 'password')
+    @gateway = HsbcGateway.new(fixtures(:hsbc))
     @credit_card = credit_card
     @amount = 100
 

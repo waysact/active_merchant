@@ -30,12 +30,11 @@ module ActiveMerchant #:nodoc:
 
       def authorize(money, payment, options={})
         post = {}
-        add_invoice(post, money, options)
-        add_payment(post, payment)
-        add_address(post, payment, options)
-        add_customer_data(post, options)
 
-        commit('authonly', post)
+        add_direct_debit_authorisation_data(post, money, options)
+        add_creditor_account(post, options)
+
+        commit('authorisations', post)
       end
 
       def capture(money, authorization, options={})
@@ -81,12 +80,43 @@ module ActiveMerchant #:nodoc:
       def add_payment(post, payment)
       end
 
+      def add_direct_debit_authorisation_data(post, money, options)
+        post["MerchantRequestIdentification"] = options[:merchant_request_identification]
+        post["CreditorReference"] = options[:creditor_reference]
+        post["DebtorName"] = options[:debtor_name]
+        post["DebtorAccount"] = {
+          "BankCode": options[:debtor_bank_code],
+          "AccountIdentification": options[:account_identification],
+          "Currency": 'HKD' # Only HKD is supported
+        }
+        post["CreditorName"] = options[:creditor_name]
+        post["DebtorPrivateIdentification"] = options[:debtor_private_identification]
+        post["DebtorPrivateIdentificationSchemeName"] = options[:debtor_private_identification_scheme_name]
+        post["DebtorMobileNumber"] = options[:debtor_mobile_number]
+        post["MaximumAmountCurrency"] = 'HKD' # Only HKD is supported
+        post["MaximumAmount"] = amount(money)
+        post["Occurrences"] = {
+          # We're only supporting monthly direct debit right now
+          "FrequencyType": 'MNTH',
+          # And they don't expire - it's another system's job to cancel them
+          "DurationToDate": '9999-12-31'
+        }
+      end
+
+      def add_creditor_account(post, options)
+        post["CreditorAccount"] = {
+          "BankCode": options[:creditor_bank_code],
+          "AccountIdentification": options[:account_identification],
+          "Currency": 'HKD' # Only HKD is supported
+        }
+      end
+
       def parse(body)
         JSON.parse(body)
       end
 
       def commit(action, parameters)
-        url = (test? ? test_url : live_url)
+        url = (test? ? test_url : live_url) + action
         begin
           response = parse(ssl_post(url, post_data(action, parameters), headers))
         rescue ActiveMerchant::ResponseError => e
@@ -107,6 +137,7 @@ module ActiveMerchant #:nodoc:
 
       def headers
         {
+          'x-hsbc-country-code': 'HK', # Hong Kong is the only supported country
           'x-hsbc-client-id': @options[:client_id],
           'x-hsbc-client-secret': @options[:client_secret],
           'x-hsbc-profile-id': @options[:profile_id],
@@ -114,11 +145,11 @@ module ActiveMerchant #:nodoc:
       end
 
       def success_from(response)
-        response['error'].nil?
+        response['error'].nil? && response['Errors'].nil?
       end
 
       def message_from(response)
-        response['description'] # TODO: Process success
+        response['description'] || response['Message'] # TODO: Process success
       end
 
       def authorization_from(response)
