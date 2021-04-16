@@ -400,6 +400,11 @@ hdfc:
 hps:
   secret_api_key: "skapi_cert_MYl2AQAowiQAbLp5JesGKh7QFkcizOP2jcX9BrEMqQ"
 
+# Working credentials, no need to replace
+hsbc:
+  some_credential: SOMECREDENTIAL
+  another_credential: ANOTHERCREDENTIAL
+
 iats_payments:
   agent_code: TEST88
   password: TEST88
