@@ -37,7 +37,7 @@ class RemoteHsbcTest < Test::Unit::TestCase
   def test_successful_authorisation
     response = @gateway.authorize(@amount, @direct_debit, @options)
     assert_success response
-    assert_match "wrong client_id or client_secret", response.message
+    assert_match %r{MandateIdentification}, response.message
   end
 
   def test_dump_transcript
