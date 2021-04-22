@@ -1,3 +1,4 @@
 eval_gemfile '../Gemfile'
 
 gem 'activesupport', '~> 6.0.0'
+gem 'gpgme', '~> 2'

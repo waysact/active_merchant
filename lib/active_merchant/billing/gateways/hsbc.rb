@@ -1,3 +1,5 @@
+require 'tmpdir'
+
 module ActiveMerchant #:nodoc:
   module Billing #:nodoc:
     class HsbcGateway < Gateway
@@ -7,6 +9,8 @@ module ActiveMerchant #:nodoc:
       self.supported_countries = ['HK']
       self.default_currency = 'HKD'
       self.supported_cardtypes = []
+
+      self.money_format = :cents
 
       self.homepage_url = 'https://www.hsbc.com.hk/'
       self.display_name = 'HSBC'
@@ -18,46 +22,16 @@ module ActiveMerchant #:nodoc:
         super
       end
 
-      def purchase(money, payment, options={})
-        post = {}
-        add_invoice(post, money, options)
-        add_payment(post, payment)
-        add_address(post, payment, options)
-        add_customer_data(post, options)
-
-        commit('sale', post)
-      end
-
       def authorize(money, payment, options={})
         post = {}
 
         add_direct_debit_authorisation_data(post, money, options)
-        add_creditor_account(post, options)
 
         commit('authorisations', post)
       end
 
-      def capture(money, authorization, options={})
-        commit('capture', post)
-      end
-
-      def refund(money, authorization, options={})
-        commit('refund', post)
-      end
-
-      def void(authorization, options={})
-        commit('void', post)
-      end
-
-      def verify(credit_card, options={})
-        MultiResponse.run(:use_first_response) do |r|
-          r.process { authorize(100, credit_card, options) }
-          r.process(:ignore_result) { void(r.authorization, options) }
-        end
-      end
-
       def supports_scrubbing?
-        true
+        false
       end
 
       def scrub(transcript)
@@ -83,13 +57,16 @@ module ActiveMerchant #:nodoc:
       def add_direct_debit_authorisation_data(post, money, options)
         post["MerchantRequestIdentification"] = options[:merchant_request_identification]
         post["CreditorReference"] = options[:creditor_reference]
+        post["UltimateDebtorName"] = options[:debtor_name]
         post["DebtorName"] = options[:debtor_name]
         post["DebtorAccount"] = {
           "BankCode": options[:debtor_bank_code],
           "AccountIdentification": options[:account_identification],
-          "Currency": 'HKD' # Only HKD is supported
+          "Currency": 'HKD', # Only HKD is supported
+          "AccountSchemeName": 'BBAN', # Only value supported
         }
         post["CreditorName"] = options[:creditor_name]
+        add_creditor_account(post, options)
         post["DebtorPrivateIdentification"] = options[:debtor_private_identification]
         post["DebtorPrivateIdentificationSchemeName"] = options[:debtor_private_identification_scheme_name]
         post["DebtorMobileNumber"] = options[:debtor_mobile_number]
@@ -99,20 +76,63 @@ module ActiveMerchant #:nodoc:
           # We're only supporting monthly direct debit right now
           "FrequencyType": 'MNTH',
           # And they don't expire - it's another system's job to cancel them
-          "DurationToDate": '9999-12-31'
+          "DurationToDate": '9999-12-31',
         }
+        post["OtpHoldIndicator"] = false
+        post["SmsLanguageCode"] = "eng"
       end
 
       def add_creditor_account(post, options)
         post["CreditorAccount"] = {
           "BankCode": options[:creditor_bank_code],
-          "AccountIdentification": options[:account_identification],
-          "Currency": 'HKD' # Only HKD is supported
+          "AccountIdentification": options[:creditor_account_identification],
+          "Currency": 'HKD', # Only HKD is supported
+          "AccountSchemeName": 'BBAN', # Only value supported
         }
       end
 
       def parse(body)
         JSON.parse(body)
+      end
+
+      def gpg_encrypt(plaintext)
+        plaintext_io = StringIO.new plaintext
+        output_filename = SecureRandom.hex(16)
+        output_path = Dir.mktmpdir
+        output_file = File.join(output_path, output_filename)
+        ActiveMerchant::Crypto.encrypt_and_sign(plaintext_io, output_file, @options[:public_key], @options[:private_key])
+        File.read(output_file)
+      ensure
+        # remove the temporary directory we created
+        begin
+          FileUtils.remove_entry_secure output_path
+        rescue Errno::ENOENT # rubocop:disable Lint/HandleExceptions
+          # ignore
+        end
+      end
+
+      def gpg_decrypt(ciphertext)
+        ciphertext_io = StringIO.new ciphertext
+        output_filename = SecureRandom.hex(16)
+        output_path = Dir.mktmpdir
+        output_file = File.join(output_path, output_filename)
+        ActiveMerchant::Crypto.decrypt_and_verify(ciphertext_io, output_file, @options[:public_key], @options[:private_key])
+        File.read(output_file)
+      ensure
+        # remove the temporary directory we created
+        begin
+          FileUtils.remove_entry_secure output_path
+        rescue Errno::ENOENT # rubocop:disable Lint/HandleExceptions
+          # ignore
+        end
+      end
+
+      def encode_payload(payload)
+        Base64.strict_encode64(payload.to_s)
+      end
+
+      def decode_payload(payload)
+        Base64.strict_decode64(payload)
       end
 
       def commit(action, parameters)
@@ -141,6 +161,7 @@ module ActiveMerchant #:nodoc:
           'x-hsbc-client-id': @options[:client_id],
           'x-hsbc-client-secret': @options[:client_secret],
           'x-hsbc-profile-id': @options[:profile_id],
+          'content-type': 'application/json',
         }
       end
 
@@ -149,13 +170,23 @@ module ActiveMerchant #:nodoc:
       end
 
       def message_from(response)
-        response['description'] || response['Message'] # TODO: Process success
+        if success_from(response)
+          ciphertext = decode_payload(response['ResponseBase64'])
+          gpg_decrypt(ciphertext)
+        else
+          "#{response['Id']} #{response['Code']} #{response['Message']}"
+        end
       end
 
       def authorization_from(response)
       end
 
       def post_data(action, parameters = {})
+        {
+          RequestBase64: encode_payload(
+            gpg_encrypt(parameters.to_json.to_s)
+          )
+        }.to_json
       end
 
       def error_code_from(response)
