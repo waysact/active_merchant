@@ -51,7 +51,7 @@ module ActiveMerchant
     #   public_key: the gpg armored public key that we will use to verify the signature with
     #   private_key: the gpg armored private key that we will use to decrypt the ciphertext
     # output:
-    #   the path to an file with the plaintext
+    #   the path to a file with the plaintext
     def self.decrypt_and_verify(ciphertext_io, output_path, public_key, private_key)
       gpg_temp_dir = Dir.mktmpdir
       GPGME::Engine.home_dir = gpg_temp_dir
