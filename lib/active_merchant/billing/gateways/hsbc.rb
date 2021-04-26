@@ -30,6 +30,14 @@ module ActiveMerchant #:nodoc:
         commit('authorisations', post)
       end
 
+      def authorize_confirmation(options={})
+        post = {}
+
+        add_otp_confirmation_data(post, options)
+
+        commit('authorisations/otp-confirmation', post)
+      end
+
       def supports_scrubbing?
         false
       end
@@ -40,24 +48,16 @@ module ActiveMerchant #:nodoc:
 
       private
 
-      def add_customer_data(post, options)
-      end
-
-      def add_address(post, creditcard, options)
-      end
-
-      def add_invoice(post, money, options)
-        post[:amount] = amount(money)
-        post[:currency] = (options[:currency] || currency(money))
-      end
-
-      def add_payment(post, payment)
+      def add_otp_confirmation_data(post, options)
+        post["MandateIdentification"] = options[:mandate_identification]
+        add_creditor_account(post, options)
+        post["OtpIdentificationNumber"] = options[:otp_identification_number]
+        post["OtpPassword"] = options[:otp_password]
       end
 
       def add_direct_debit_authorisation_data(post, money, options)
         post["MerchantRequestIdentification"] = options[:merchant_request_identification]
         post["CreditorReference"] = options[:creditor_reference]
-        post["UltimateDebtorName"] = options[:debtor_name]
         post["DebtorName"] = options[:debtor_name]
         post["DebtorAccount"] = {
           "BankCode": options[:debtor_bank_code],
@@ -95,28 +95,20 @@ module ActiveMerchant #:nodoc:
         JSON.parse(body)
       end
 
-      def gpg_encrypt(plaintext)
-        plaintext_io = StringIO.new plaintext
-        output_filename = SecureRandom.hex(16)
-        output_path = Dir.mktmpdir
-        output_file = File.join(output_path, output_filename)
-        ActiveMerchant::Crypto.encrypt_and_sign(plaintext_io, output_file, @options[:public_key], @options[:private_key])
-        File.read(output_file)
-      ensure
-        # remove the temporary directory we created
-        begin
-          FileUtils.remove_entry_secure output_path
-        rescue Errno::ENOENT # rubocop:disable Lint/HandleExceptions
-          # ignore
-        end
+      def encrypt_and_sign(plaintext)
+        gpg_operations(:encrypt_and_sign, plaintext)
       end
 
-      def gpg_decrypt(ciphertext)
-        ciphertext_io = StringIO.new ciphertext
+      def decrypt_and_verify(ciphertext)
+        gpg_operations(:decrypt_and_verify, ciphertext)
+      end
+
+      def gpg_operations(operation, payload)
+        payload_io = StringIO.new payload
         output_filename = SecureRandom.hex(16)
         output_path = Dir.mktmpdir
         output_file = File.join(output_path, output_filename)
-        ActiveMerchant::Crypto.decrypt_and_verify(ciphertext_io, output_file, @options[:public_key], @options[:private_key])
+        ActiveMerchant::Crypto.send(operation, payload_io, output_file, @options[:public_key], @options[:private_key])
         File.read(output_file)
       ensure
         # remove the temporary directory we created
@@ -172,7 +164,7 @@ module ActiveMerchant #:nodoc:
       def message_from(response)
         if success_from(response)
           ciphertext = decode_payload(response['ResponseBase64'])
-          gpg_decrypt(ciphertext)
+          parse(decrypt_and_verify(ciphertext))
         else
           "#{response['Id']} #{response['Code']} #{response['Message']}"
         end
@@ -184,7 +176,7 @@ module ActiveMerchant #:nodoc:
       def post_data(action, parameters = {})
         {
           RequestBase64: encode_payload(
-            gpg_encrypt(parameters.to_json.to_s)
+            encrypt_and_sign(parameters.to_json.to_s)
           )
         }.to_json
       end

@@ -13,8 +13,8 @@ module ActiveMerchant
     def self.encrypt_and_sign(plain_text_io, output_path, public_key, private_key)
       gpg_temp_dir = Dir.mktmpdir
       GPGME::Engine.home_dir = gpg_temp_dir
-      GPGME::Key.import(private_key)
       GPGME::Key.import(public_key)
+      GPGME::Key.import(private_key)
 
       crypto = GPGME::Crypto.new
       plain_text_data = GPGME::Data.from_io(plain_text_io)
@@ -51,12 +51,12 @@ module ActiveMerchant
     #   public_key: the gpg armored public key that we will use to verify the signature with
     #   private_key: the gpg armored private key that we will use to decrypt the ciphertext
     # output:
-    #   the path to an armored encrypted file
+    #   the path to an file with the plaintext
     def self.decrypt_and_verify(ciphertext_io, output_path, public_key, private_key)
       gpg_temp_dir = Dir.mktmpdir
       GPGME::Engine.home_dir = gpg_temp_dir
-      GPGME::Key.import(private_key)
       GPGME::Key.import(public_key)
+      GPGME::Key.import(private_key)
 
       crypto = GPGME::Crypto.new
       ciphertext_data = GPGME::Data.from_io(ciphertext_io)

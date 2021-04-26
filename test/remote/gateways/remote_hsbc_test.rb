@@ -37,7 +37,17 @@ class RemoteHsbcTest < Test::Unit::TestCase
   def test_successful_authorisation
     response = @gateway.authorize(@amount, @direct_debit, @options)
     assert_success response
-    assert_match %r{MandateIdentification}, response.message
+    assert_match "00", response.message["ProcessResult"]["ResponseCode"]
+
+    otp_options = {}
+    otp_options[:mandate_identification] = response.message["MandateIdentification"]
+    otp_options[:otp_identification_number] = response.message["OtpIdentificationNumber"]
+    puts "Enter OTP password:"
+    otp_password = STDIN.gets
+    otp_options[:otp_password] = otp_password.chomp
+    otp_response = @gateway.authorize_confirmation(@options.merge(otp_options))
+    assert_success otp_response
+    assert_match "00", otp_response.message["ProcessResult"]["ResponseCode"]
   end
 
   def test_dump_transcript
