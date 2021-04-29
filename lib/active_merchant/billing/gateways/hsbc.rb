@@ -38,6 +38,14 @@ module ActiveMerchant #:nodoc:
         commit('authorisations/otp-confirmation', post)
       end
 
+      def authorize_otp_regeneration(options={})
+        post = {}
+
+        add_otp_regeneration_data(post, options)
+
+        commit('authorisations/otp-regeneration', post)
+      end
+
       def supports_scrubbing?
         false
       end
@@ -79,6 +87,12 @@ module ActiveMerchant #:nodoc:
           "DurationToDate": '9999-12-31',
         }
         post["OtpHoldIndicator"] = false
+        post["SmsLanguageCode"] = "eng"
+      end
+
+      def add_otp_regeneration_data(post, options)
+        post["MandateIdentification"] = options[:mandate_identification]
+        add_creditor_account(post, options)
         post["SmsLanguageCode"] = "eng"
       end
 

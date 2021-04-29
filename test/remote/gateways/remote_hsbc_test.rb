@@ -50,6 +50,25 @@ class RemoteHsbcTest < Test::Unit::TestCase
     assert_match "00", otp_response.message["ProcessResult"]["ResponseCode"]
   end
 
+  def test_successful_otp_regeneration_authorisation
+    response = @gateway.authorize(@amount, @direct_debit, @options)
+    assert_success response
+    assert_match "00", response.message["ProcessResult"]["ResponseCode"]
+
+    @options.merge!(mandate_identification: response.message["MandateIdentification"])
+    otp_regeneration_request = @gateway.authorize_otp_regeneration(@options)
+    assert_success response
+    assert_match "00", response.message["ProcessResult"]["ResponseCode"]
+
+    @options.merge!(otp_identification_number: otp_regeneration_request.message["OtpIdentificationNumber"])
+    puts "Enter the *SECOND* OTP password you were sent:"
+    otp_password = STDIN.gets
+    @options.merge!(otp_password: otp_password.chomp)
+    otp_response = @gateway.authorize_confirmation(@options)
+    assert_success otp_response
+    assert_match "00", otp_response.message["ProcessResult"]["ResponseCode"]
+  end
+
   def test_dump_transcript
     # This test will run a purchase transaction on your gateway
     # and dump a transcript of the HTTP conversation so that
