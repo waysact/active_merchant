@@ -176,11 +176,11 @@ module ActiveMerchant #:nodoc:
       end
 
       def message_from(response)
-        if success_from(response)
+        if response['ResponseBase64']
           ciphertext = decode_payload(response['ResponseBase64'])
           parse(decrypt_and_verify(ciphertext))
         else
-          "#{response['Id']} #{response['Code']} #{response['Message']}"
+          response['Message']
         end
       end
 
@@ -202,7 +202,7 @@ module ActiveMerchant #:nodoc:
 
       def error_code_from(response)
         unless success_from(response)
-          # TODO: lookup error code for this response
+          response['Code']
         end
       end
     end

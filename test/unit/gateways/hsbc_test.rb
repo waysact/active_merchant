@@ -32,7 +32,11 @@ class HsbcTest < Test::Unit::TestCase
   end
 
   def test_failed_authorisation
-    pend("Pending implementation of failed authorisation test")
+    @gateway.expects(:ssl_post).returns(failed_authorisation_response)
+
+    response = @gateway.authorize(@amount, @credit_card, @options)
+    assert_failure response
+    assert_equal 'RJCT', response.error_code
   end
 
   def test_scrub
@@ -45,6 +49,15 @@ class HsbcTest < Test::Unit::TestCase
     '{"ResponseBase64": "LS0tLS1CRUdJTiBQR1AgTUVTU0FHRS0tLS0tCgpoSXdETVl6a0NCNE44MmdCQS85TzBXbWQwS25ZNzVhZWJBZUFrclNIcUc2TDJBWXpmMWRSNWdEOUtuSHIzUFZCCnVyZmZGZUdlcWZTdHIyUVk4aE5aMkFseGpBdE8zdUwwR3NodGExZnkxT3dmemd4d1cyQmtaRm9xSFVuSHlXOTIKYXNJNlFuVkUyRGZHWElrWmoxdWVXRUtlbitOam05STgyelJNYjU0dmpoNGF6MTdhZ3ZlZjdsVUtoS0VTUU5MQQo0Z0hGVFdvNGhob2k1czgwbm1kQWM3YmZaMmJKK1BtOWpjcVJLcEIzK2JaSmhjbzFxaU1uM0E2bmVqZndVd3FYCmJxOFZaUjMrQjB3T2FhY1FrUHdTREJEbkNxKzhvUjZ5Z1prUHpLYzN2TGQ4ZGtScTZKYUREMzl2Qlp6amdnenQKZEpIenZsR1BoYjF1VVBhRHl1MlhyVkZPalhENGV4bjJqSXR6ditqNmpSb0dnM3Z4YU96akVsdWpRMGMyQ3NjKwp3bStmbEFBSEd1bGlJbkxrWEQydUxLQkNxOFJ3ektjc1lLbmljOGluQXpiSlQzM3RyNVdTWmdGcWpPakxIaWtiCnZGeVpEQ1lsMzRzMDM4dGlqaDErVC95akJlaUpmZjB6MjFRS2NVbGZtdU9JcEs0OGJPSkE5bDlWcmhhaFVYYU4Kclprck9JRU1USk55SmsyRi82S2ZnL3lwbWN0VnM3ZzRCMVR6Q0VDZ0tHcWxPWlYrRWhTcndiSXpwSGlTaDk1dApReWxLdm4wK1RZWkVVQWdVc3hnU2RUTllEcVBoZGkzYSt6SVBSMVVIeHhBT0prK3hrSW56T0VvYVp2Qm53bzN6ClB1UDNUQnYranlPN2kwVWYxZ1FyNnM0bEFMQ29jWWdabnNqRDRIb0VrZVMvRTNTaThOa2F4NTkzaFBXQ09hQmIKTTJ0eEYrOTdKWHVxUzlXbmRyKzh2MGlycGVDWU5seTU4bUZjSTFMdmJVa3ZGNWs9Cj1NR2RxCi0tLS0tRU5EIFBHUCBNRVNTQUdFLS0tLS0K"}'
   end
 
-  def failed_authorize_response
+  def failed_authorisation_response
+    '{
+      "Id": "a20a6d39-e143-43d5-ade0-ebf5f76dcb87",
+      "Code": "RJCT",
+      "Message": "Invalid Account Number provided",
+      "Errors": [{
+        "ErrorCode": "RJCT",
+        "Message": "[Collections] [Direct Debit Authorisation API] [VALIDATE_CDP_SHEX_DATA] -Invalid Account Number provided - Account Number attributes missing - accountType:null,institution:null, customerId:null"
+      }]
+    }'
   end
 end
