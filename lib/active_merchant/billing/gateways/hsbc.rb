@@ -187,6 +187,11 @@ module ActiveMerchant #:nodoc:
       end
 
       def authorization_from(response)
+        if success_from(response)
+          plaintext_response = message_from(response)
+          
+          plaintext_response['MandateIdentification']
+        end
       end
 
       def post_data(action, parameters = {})
