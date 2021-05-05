@@ -69,24 +69,13 @@ class RemoteHsbcTest < Test::Unit::TestCase
     assert_match "00", otp_response.message["ProcessResult"]["ResponseCode"]
   end
 
-  def test_dump_transcript
-    # This test will run a purchase transaction on your gateway
-    # and dump a transcript of the HTTP conversation so that
-    # you can use that transcript as a reference while
-    # implementing your scrubbing logic.  You can delete
-    # this helper after completing your scrub implementation.
-    dump_transcript_and_fail(@gateway, @amount, @credit_card, @options)
-  end
-
   def test_transcript_scrubbing
     transcript = capture_transcript(@gateway) do
-      @gateway.purchase(@amount, @credit_card, @options)
+      @gateway.authorize(@amount, @direct_debit, @options)
     end
     transcript = @gateway.scrub(transcript)
 
-    assert_scrubbed(@credit_card.number, transcript)
-    assert_scrubbed(@credit_card.verification_value, transcript)
-    assert_scrubbed(@gateway.options[:password], transcript)
+    assert_scrubbed(@gateway.options[:client_id], transcript)
+    assert_scrubbed(@gateway.options[:client_secret], transcript)
   end
-
 end

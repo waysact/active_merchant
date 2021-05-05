@@ -47,11 +47,13 @@ module ActiveMerchant #:nodoc:
       end
 
       def supports_scrubbing?
-        false
+        true
       end
 
       def scrub(transcript)
-        transcript
+        transcript.
+          gsub(/(X-Hsbc-Client-Id: )([A-Za-z0-9]{32})/i, '\1[FILTERED]').
+          gsub(/(X-Hsbc-Client-Secret: )([A-Za-z0-9]{32})/i, '\1[FILTERED]')
       end
 
       private
