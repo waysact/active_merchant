@@ -13,8 +13,15 @@ module ActiveMerchant
     def self.encrypt_and_sign(plain_text_io, output_path, public_key, private_key)
       gpg_temp_dir = Dir.mktmpdir
       GPGME::Engine.home_dir = gpg_temp_dir
-      GPGME::Key.import(public_key)
-      GPGME::Key.import(private_key)
+
+      public_key_imported = GPGME::Key.import(public_key)
+      private_key_imported = GPGME::Key.import(private_key)
+
+      raise ArgumentError.new("Failed to import exactly 1 public key. Check public_key provided.") if public_key_imported.imports.size != 1
+      raise ArgumentError.new("Failed to import exactly 1 private key. Check private_key provided.") if private_key_imported.imports.size != 1
+
+      gpg_public_key = GPGME::Key.get(public_key_imported.imports.first.fingerprint)
+      gpg_private_key = GPGME::Key.get(private_key_imported.imports.first.fingerprint)
 
       crypto = GPGME::Crypto.new
       plain_text_data = GPGME::Data.from_io(plain_text_io)
@@ -23,11 +30,11 @@ module ActiveMerchant
         File.open(output_path, 'w+') do |encrypted_file|
           crypto.encrypt(
             plain_text_data,
-            recipients: ['hsbc_bis_obd@hsbc.com'],
+            recipients: [gpg_public_key.email],
             always_trust: true,
             armor: true,
             sign: true,
-            signers: ['support@evergiving.com'],
+            signers: [gpg_private_key.email],
             output: encrypted_file,
           )
         end
