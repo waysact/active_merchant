@@ -18,7 +18,7 @@ module ActiveMerchant #:nodoc:
       STANDARD_ERROR_CODE_MAPPING = {}
 
       def initialize(options={})
-        requires!(options, :client_id, :client_secret, :profile_id, :public_key)
+        requires!(options, :client_id, :client_secret, :profile_id, :public_key, :private_key)
         super
       end
 
