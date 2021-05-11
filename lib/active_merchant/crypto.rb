@@ -23,9 +23,11 @@ module ActiveMerchant
         File.open(output_path, 'w+') do |encrypted_file|
           crypto.encrypt(
             plain_text_data,
+            recipients: ['hsbc_bis_obd@hsbc.com'],
             always_trust: true,
             armor: true,
             sign: true,
+            signers: ['support@evergiving.com'],
             output: encrypted_file,
           )
         end
