@@ -131,15 +131,15 @@ class HsbcTest < Test::Unit::TestCase
   end
 
   def failed_authorize_confirmation_response
-      '{
-        "Id": "13df1c08-df15-40f7-935d-fc2d9aa3c41b",
-        "Code": "RJCT",
-        "Message": "Validation failed on MPP service.",
-        "Errors": [{
-          "ErrorCode": "MPP04003",
-          "Message": "[Collections] [Direct Debit Authorisation Confirmation API] [VALIDATE_MPP_RESPONSE] - Validation failed on MPP service. - [MPP04003:OTP confirmation code is invalid]"
-        }]
-      }'
+    '{
+      "Id": "13df1c08-df15-40f7-935d-fc2d9aa3c41b",
+      "Code": "RJCT",
+      "Message": "Validation failed on MPP service.",
+      "Errors": [{
+        "ErrorCode": "MPP04003",
+        "Message": "[Collections] [Direct Debit Authorisation Confirmation API] [VALIDATE_MPP_RESPONSE] - Validation failed on MPP service. - [MPP04003:OTP confirmation code is invalid]"
+      }]
+    }'
   end
 
   def successful_authorize_otp_regeneration
