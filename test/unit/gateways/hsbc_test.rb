@@ -51,7 +51,7 @@ class HsbcTest < Test::Unit::TestCase
     response = @gateway.authorize_confirmation(@options.merge(otp_options))
 
     assert_success response
-    assert_match "00", response.message["ProcessResult"]["ResponseCode"]
+    assert_equal '00', response.message["ProcessResult"]["ResponseCode"]
     assert response.test?
   end
 
