@@ -57,8 +57,8 @@ class RemoteHsbcTest < Test::Unit::TestCase
 
     @options.merge!(mandate_identification: response.message["MandateIdentification"])
     otp_regeneration_request = @gateway.authorize_otp_regeneration(@options)
-    assert_success response
-    assert_match "00", response.message["ProcessResult"]["ResponseCode"]
+    assert_success otp_regeneration_request
+    assert_match "00", otp_regeneration_request.message["ProcessResult"]["ResponseCode"]
 
     @options.merge!(otp_identification_number: otp_regeneration_request.message["OtpIdentificationNumber"])
     puts "Enter the *SECOND* OTP password you were sent:"
