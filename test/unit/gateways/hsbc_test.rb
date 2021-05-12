@@ -34,7 +34,7 @@ class HsbcTest < Test::Unit::TestCase
   def test_failed_authorisation
     @gateway.expects(:ssl_post).returns(failed_authorisation_response)
 
-    response = @gateway.authorize(@amount, @credit_card, @options)
+    response = @gateway.authorize(@amount, @direct_debit, @options)
     assert_failure response
     assert_equal 'RJCT', response.error_code
   end
