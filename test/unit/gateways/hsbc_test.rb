@@ -83,6 +83,18 @@ class HsbcTest < Test::Unit::TestCase
     assert response.test?
   end
 
+  def test_failed_authorize_otp_regeneration
+    @gateway.expects(:ssl_post).returns(failed_authorize_otp_regeneration)
+
+    response = @gateway.authorize_otp_regeneration(
+      @options.merge(mandate_identification: 'D123456789')
+    )
+
+    assert_failure response
+    assert_equal 'RJCT', response.error_code
+    assert response.test?
+  end
+
   def test_scrub
     assert @gateway.supports_scrubbing?
     assert_equal @gateway.scrub(pre_scrubbed), post_scrubbed
@@ -153,6 +165,18 @@ class HsbcTest < Test::Unit::TestCase
     #   "OtpIdentificationNumber": "123"
     # }
     '{"ResponseBase64": "LS0tLS1CRUdJTiBQR1AgTUVTU0FHRS0tLS0tCgpoSXdETVl6a0NCNE44MmdCQkFDR1lhY2hjUVVjTVVOdFpWcmQrQmxPU29WRFBER0ZGLzlKR3ZqeWYxMUgzMml1CjJXYk1ZQXMxUFo4dVBUd2w3ZTQ0Mmd5Ym5QTFZobldWajdCU1VMMUo2THRBdHlxa3ZHNklxR0dUdFBXNE9Sek8KTHVpTUJycEJZUm41N3VqZmY1bFdJUm4xcE9YMnM2SXRPdFBHWUZhaWs1d1BXbG5ZUkg2RW0xcXloL01TWnRMQQpvUUZyd1Z1SEVKbjNDVW84TDd0OXdlbXJOakI2NVVyMlUvdXZjdjRLcUhOeTFCMTJhRmJMN0NTamRUUVBZb09YCnRqZFRMYzRSV1R3QlJsbTc1K0VjNGxFSGxqemk3K2psK3QyKzRKU2VNYnk1N2J4akptMTh1WkVXVm1sOTEzYTEKakVDUnkzbis4TFNEdjdUdWJQU2F0alhZZnhacEU3ak5wbFZaNXZHZXA4dUptU2FMcmZwTnpCTFRnMHhoRUpjWQpFSlJCemI3bHdRN2JZaTNvdXRTSGgxYW5jTTVEeldFR3Y4dDBIS3pubG1iaUllaE5HZFc2SWNNSGthLzVtQlZGCnFnbUpPRGlwMmhTaGhQelZYOWZRZDR0NGg5aG5WQlRPeVAxTnNlS0NjOVVLbXZjZ01GRFdBSjVnNGl6S1JmQ0wKSzUyc3lLOEFFOFNKQlQ1R2wyb3QyeHlVYWM0NnV0eUdJYVpWZWFTdm9HczRTUWl2MlNQRHcrVERsWU9TaVBDbgp0b2hGTjQ5ZGl2T2ZPK1IvZkRYRm1XVnZMQWQ1L0Y0KzBOUW82UUYwWHhIbjlvbzJQcEY1V3JjZ3NaOHFUNGVYCi96TXp4dGsvRU9Wa01GUEFzMEFnU1FTRAo9SGo3TgotLS0tLUVORCBQR1AgTUVTU0FHRS0tLS0tCg=="}'
+  end
+
+  def failed_authorize_otp_regeneration
+    '{
+      "Id": "9bd4bcb4-4beb-4ab3-a1ca-76405523f44a",
+      "Code": "RJCT",
+      "Message": "Validation failed on MPP service.",
+      "Errors": [{
+        "ErrorCode": "MFISMD01",
+        "Message": "[Collections] [Direct Debit Authorisation OTP Re-Generation API] [VALIDATE_MPP_RESPONSE] - Validation failed on MPP service. - [MFISMD01:Mandate Identification provided not found]"
+      }]
+    }'
   end
 
   def pre_scrubbed
