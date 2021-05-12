@@ -17,10 +17,10 @@ module ActiveMerchant
       public_key_imported = GPGME::Key.import(public_key)
       private_key_imported = GPGME::Key.import(private_key)
 
-      raise ArgumentError.new("Failed to import exactly 1 public key. Check public_key provided.") if public_key_imported.imports.size != 1
+      raise ArgumentError, "Failed to import exactly 1 public key. Check public_key provided." if public_key_imported.imports.size != 1
       # the private_key contains the public_key as well, so .imports.size contains
       # two elements
-      raise ArgumentError.new("Failed to import the private key. Check private_key provided.") if private_key_imported.imports.size != 2
+      raise ArgumentError, "Failed to import the private key. Check private_key provided." if private_key_imported.imports.size != 2
 
       gpg_public_key = GPGME::Key.get(public_key_imported.imports.first.fingerprint)
       gpg_private_key = GPGME::Key.get(private_key_imported.imports.first.fingerprint)
