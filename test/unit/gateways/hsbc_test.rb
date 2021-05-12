@@ -55,6 +55,21 @@ class HsbcTest < Test::Unit::TestCase
     assert response.test?
   end
 
+  def test_failed_authorize_confirmation
+    @gateway.expects(:ssl_post).returns(failed_authorize_confirmation_response)
+
+    otp_options = {
+      mandate_identification: 'D21051276268',
+      otp_identification_number: '380',
+      otp_password: '654321'
+    }
+    response = @gateway.authorize_confirmation(@options.merge(otp_options))
+
+    assert_failure response
+    assert_equal 'RJCT', response.error_code
+    assert response.test?
+  end
+
   def test_successful_authorize_otp_regeneration
     @gateway.expects(:ssl_post).returns(successful_authorize_otp_regeneration)
 
@@ -113,6 +128,18 @@ class HsbcTest < Test::Unit::TestCase
     #   }
     # }
     '{"ResponseBase64": "LS0tLS1CRUdJTiBQR1AgTUVTU0FHRS0tLS0tCgpoSXdETVl6a0NCNE44MmdCQkFDbnk5NHZjWTkzWVhwcGF5QkQrZHFQVlVZejUvUE5SV3h0Q3RVM2hSRXUvdElyCnlLRTh2VjRsbWE3eWxIUkJkMWI5SGd6RUxGMk9PYlFOZ1VTYTVEK1Z0VndOZHBubmZZUVhjd21ONWNYa2ZFcDEKN3cxb1Yva0JUNUxwa0NMalhOR2xndGxDRjFJVlMwYXRmZ2QwcERGK3pzcmhrWk5sM0FjdVZBbllBK3ZwNDlMQQpnQUhpZmUvYU5Fa0txQTZIcHVibk9LSzVnR2tDd0oxTU9FWitCM2Fiby9SaVZuSmhVYkw2ZjdVc2k3MEdnbVYwCkhKV3ppYTBicUcyK0lqR0twc2N2aHphUGNtRVpLeUxlS3RNK0kxMllRMHVnRzRqaGxpcHF4THRsL3JJUVZPd3QKai9uWHRYY1MyK0tudUs1d29wOEQvWk1XNGtWYVNQSExFZi8zbTBlVndBVjNOV21rTFl4TTRISEUxallONXIwNApIam0xbkU3UVhTd3N3Ukt0S04wZ1FZa1ZCUWhYWVZ4UC9UMEd2ZkpIajNSWVVLNStNU09ISE1RNmk2TVpjN2VJCjE2cFU1bDJaaGtSbU4zVDIzR09QQkRXVGdDZWhOcDY5YXoxNHljaS8rWEZmVW4zYklNWFlHRCs2UkRxWkJYVGcKaEd2U3JqL0NrSWlSMmxiMFo1dmlIWHdoVTRzN0JtaFlKOHJXckZHOVVic1pkNGFJTy92ZEdQKzVjRTV0ajYwRwpYZFRsL3V2Q1dpb0JvWXRJWWFQTmNBYjZiNWV5OFhZQnMwVHVvNk9DNXVXWgo9NWpqZwotLS0tLUVORCBQR1AgTUVTU0FHRS0tLS0tCg=="}'
+  end
+
+  def failed_authorize_confirmation_response
+      '{
+        "Id": "13df1c08-df15-40f7-935d-fc2d9aa3c41b",
+        "Code": "RJCT",
+        "Message": "Validation failed on MPP service.",
+        "Errors": [{
+          "ErrorCode": "MPP04003",
+          "Message": "[Collections] [Direct Debit Authorisation Confirmation API] [VALIDATE_MPP_RESPONSE] - Validation failed on MPP service. - [MPP04003:OTP confirmation code is invalid]"
+        }]
+      }'
   end
 
   def successful_authorize_otp_regeneration
