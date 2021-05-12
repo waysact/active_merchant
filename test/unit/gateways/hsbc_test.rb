@@ -55,6 +55,19 @@ class HsbcTest < Test::Unit::TestCase
     assert response.test?
   end
 
+  def test_successful_authorize_otp_regeneration
+    @gateway.expects(:ssl_post).returns(successful_authorize_otp_regeneration)
+
+    response = @gateway.authorize_otp_regeneration(
+      @options.merge(mandate_identification: 'D21051276217')
+    )
+
+    assert_success response
+    assert_equal '00', response.message['ProcessResult']['ResponseCode']
+    assert_equal '123', response.message['OtpIdentificationNumber']
+    assert response.test?
+  end
+
   def test_scrub
     assert @gateway.supports_scrubbing?
     assert_equal @gateway.scrub(pre_scrubbed), post_scrubbed
@@ -100,6 +113,19 @@ class HsbcTest < Test::Unit::TestCase
     #   }
     # }
     '{"ResponseBase64": "LS0tLS1CRUdJTiBQR1AgTUVTU0FHRS0tLS0tCgpoSXdETVl6a0NCNE44MmdCQkFDbnk5NHZjWTkzWVhwcGF5QkQrZHFQVlVZejUvUE5SV3h0Q3RVM2hSRXUvdElyCnlLRTh2VjRsbWE3eWxIUkJkMWI5SGd6RUxGMk9PYlFOZ1VTYTVEK1Z0VndOZHBubmZZUVhjd21ONWNYa2ZFcDEKN3cxb1Yva0JUNUxwa0NMalhOR2xndGxDRjFJVlMwYXRmZ2QwcERGK3pzcmhrWk5sM0FjdVZBbllBK3ZwNDlMQQpnQUhpZmUvYU5Fa0txQTZIcHVibk9LSzVnR2tDd0oxTU9FWitCM2Fiby9SaVZuSmhVYkw2ZjdVc2k3MEdnbVYwCkhKV3ppYTBicUcyK0lqR0twc2N2aHphUGNtRVpLeUxlS3RNK0kxMllRMHVnRzRqaGxpcHF4THRsL3JJUVZPd3QKai9uWHRYY1MyK0tudUs1d29wOEQvWk1XNGtWYVNQSExFZi8zbTBlVndBVjNOV21rTFl4TTRISEUxallONXIwNApIam0xbkU3UVhTd3N3Ukt0S04wZ1FZa1ZCUWhYWVZ4UC9UMEd2ZkpIajNSWVVLNStNU09ISE1RNmk2TVpjN2VJCjE2cFU1bDJaaGtSbU4zVDIzR09QQkRXVGdDZWhOcDY5YXoxNHljaS8rWEZmVW4zYklNWFlHRCs2UkRxWkJYVGcKaEd2U3JqL0NrSWlSMmxiMFo1dmlIWHdoVTRzN0JtaFlKOHJXckZHOVVic1pkNGFJTy92ZEdQKzVjRTV0ajYwRwpYZFRsL3V2Q1dpb0JvWXRJWWFQTmNBYjZiNWV5OFhZQnMwVHVvNk9DNXVXWgo9NWpqZwotLS0tLUVORCBQR1AgTUVTU0FHRS0tLS0tCg=="}'
+  end
+
+  def successful_authorize_otp_regeneration
+    # Encrypted and base64 encoded payload of:
+    #
+    # {
+    #   "ProcessResult": {
+    #     "ResponseCode": "00",
+    #     "RejectReasonList": nil
+    #   },
+    #   "OtpIdentificationNumber": "123"
+    # }
+    '{"ResponseBase64": "LS0tLS1CRUdJTiBQR1AgTUVTU0FHRS0tLS0tCgpoSXdETVl6a0NCNE44MmdCQkFDR1lhY2hjUVVjTVVOdFpWcmQrQmxPU29WRFBER0ZGLzlKR3ZqeWYxMUgzMml1CjJXYk1ZQXMxUFo4dVBUd2w3ZTQ0Mmd5Ym5QTFZobldWajdCU1VMMUo2THRBdHlxa3ZHNklxR0dUdFBXNE9Sek8KTHVpTUJycEJZUm41N3VqZmY1bFdJUm4xcE9YMnM2SXRPdFBHWUZhaWs1d1BXbG5ZUkg2RW0xcXloL01TWnRMQQpvUUZyd1Z1SEVKbjNDVW84TDd0OXdlbXJOakI2NVVyMlUvdXZjdjRLcUhOeTFCMTJhRmJMN0NTamRUUVBZb09YCnRqZFRMYzRSV1R3QlJsbTc1K0VjNGxFSGxqemk3K2psK3QyKzRKU2VNYnk1N2J4akptMTh1WkVXVm1sOTEzYTEKakVDUnkzbis4TFNEdjdUdWJQU2F0alhZZnhacEU3ak5wbFZaNXZHZXA4dUptU2FMcmZwTnpCTFRnMHhoRUpjWQpFSlJCemI3bHdRN2JZaTNvdXRTSGgxYW5jTTVEeldFR3Y4dDBIS3pubG1iaUllaE5HZFc2SWNNSGthLzVtQlZGCnFnbUpPRGlwMmhTaGhQelZYOWZRZDR0NGg5aG5WQlRPeVAxTnNlS0NjOVVLbXZjZ01GRFdBSjVnNGl6S1JmQ0wKSzUyc3lLOEFFOFNKQlQ1R2wyb3QyeHlVYWM0NnV0eUdJYVpWZWFTdm9HczRTUWl2MlNQRHcrVERsWU9TaVBDbgp0b2hGTjQ5ZGl2T2ZPK1IvZkRYRm1XVnZMQWQ1L0Y0KzBOUW82UUYwWHhIbjlvbzJQcEY1V3JjZ3NaOHFUNGVYCi96TXp4dGsvRU9Wa01GUEFzMEFnU1FTRAo9SGo3TgotLS0tLUVORCBQR1AgTUVTU0FHRS0tLS0tCg=="}'
   end
 
   def pre_scrubbed
