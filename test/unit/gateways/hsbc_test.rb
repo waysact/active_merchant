@@ -28,6 +28,7 @@ class HsbcTest < Test::Unit::TestCase
     assert_success response
 
     assert_equal 'D2002091N014', response.authorization
+    assert_equal '649', response.message['OtpIdentificationNumber']
     assert response.test?
   end
 
