@@ -47,6 +47,18 @@ class HsbcTest < Test::Unit::TestCase
   private
 
   def successful_authorisation_response
+    # Encrypted and base64 encoded payload of:
+    #
+    # {
+    #   "ProcessResult": {
+    #     "ResponseCode": "00",
+    #     "RejectReasonList": null
+    #   },
+    #   "MandateIdentification": "D2002091N014",
+    #   "OtpIdentificationNumber": "649",
+    #   "MobileNumber": "861501*******",
+    #   "MandateStatus": "PDOU"
+    # }
     '{"ResponseBase64": "LS0tLS1CRUdJTiBQR1AgTUVTU0FHRS0tLS0tCgpoSXdETVl6a0NCNE44MmdCQS85TzBXbWQwS25ZNzVhZWJBZUFrclNIcUc2TDJBWXpmMWRSNWdEOUtuSHIzUFZCCnVyZmZGZUdlcWZTdHIyUVk4aE5aMkFseGpBdE8zdUwwR3NodGExZnkxT3dmemd4d1cyQmtaRm9xSFVuSHlXOTIKYXNJNlFuVkUyRGZHWElrWmoxdWVXRUtlbitOam05STgyelJNYjU0dmpoNGF6MTdhZ3ZlZjdsVUtoS0VTUU5MQQo0Z0hGVFdvNGhob2k1czgwbm1kQWM3YmZaMmJKK1BtOWpjcVJLcEIzK2JaSmhjbzFxaU1uM0E2bmVqZndVd3FYCmJxOFZaUjMrQjB3T2FhY1FrUHdTREJEbkNxKzhvUjZ5Z1prUHpLYzN2TGQ4ZGtScTZKYUREMzl2Qlp6amdnenQKZEpIenZsR1BoYjF1VVBhRHl1MlhyVkZPalhENGV4bjJqSXR6ditqNmpSb0dnM3Z4YU96akVsdWpRMGMyQ3NjKwp3bStmbEFBSEd1bGlJbkxrWEQydUxLQkNxOFJ3ektjc1lLbmljOGluQXpiSlQzM3RyNVdTWmdGcWpPakxIaWtiCnZGeVpEQ1lsMzRzMDM4dGlqaDErVC95akJlaUpmZjB6MjFRS2NVbGZtdU9JcEs0OGJPSkE5bDlWcmhhaFVYYU4Kclprck9JRU1USk55SmsyRi82S2ZnL3lwbWN0VnM3ZzRCMVR6Q0VDZ0tHcWxPWlYrRWhTcndiSXpwSGlTaDk1dApReWxLdm4wK1RZWkVVQWdVc3hnU2RUTllEcVBoZGkzYSt6SVBSMVVIeHhBT0prK3hrSW56T0VvYVp2Qm53bzN6ClB1UDNUQnYranlPN2kwVWYxZ1FyNnM0bEFMQ29jWWdabnNqRDRIb0VrZVMvRTNTaThOa2F4NTkzaFBXQ09hQmIKTTJ0eEYrOTdKWHVxUzlXbmRyKzh2MGlycGVDWU5seTU4bUZjSTFMdmJVa3ZGNWs9Cj1NR2RxCi0tLS0tRU5EIFBHUCBNRVNTQUdFLS0tLS0K"}'
   end
 
