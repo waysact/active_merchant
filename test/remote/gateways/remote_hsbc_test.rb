@@ -5,7 +5,6 @@ class RemoteHsbcTest < Test::Unit::TestCase
     @gateway = HsbcGateway.new(fixtures(:hsbc))
 
     @amount = 100
-    @direct_debit = 'REDACTED'
     @options = {
       merchant_request_identification: SecureRandom.hex(15),
       creditor_reference: 'REDACTED',
@@ -29,13 +28,13 @@ class RemoteHsbcTest < Test::Unit::TestCase
       public_key: 'NONE'
     )
 
-    response = gateway.authorize(@amount, @credit_card, @options)
+    response = gateway.authorize(@amount, @options)
     assert_failure response
     assert_match "wrong client_id or client_secret", response.message
   end
 
   def test_successful_authorisation
-    response = @gateway.authorize(@amount, @direct_debit, @options)
+    response = @gateway.authorize(@amount, @options)
     assert_success response
     assert_match "00", response.message["ProcessResult"]["ResponseCode"]
 
@@ -51,7 +50,7 @@ class RemoteHsbcTest < Test::Unit::TestCase
   end
 
   def test_successful_otp_regeneration_authorisation
-    response = @gateway.authorize(@amount, @direct_debit, @options)
+    response = @gateway.authorize(@amount, @options)
     assert_success response
     assert_match "00", response.message["ProcessResult"]["ResponseCode"]
 
@@ -71,7 +70,7 @@ class RemoteHsbcTest < Test::Unit::TestCase
 
   def test_transcript_scrubbing
     transcript = capture_transcript(@gateway) do
-      @gateway.authorize(@amount, @direct_debit, @options)
+      @gateway.authorize(@amount, @options)
     end
     transcript = @gateway.scrub(transcript)
 

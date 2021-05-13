@@ -22,7 +22,7 @@ module ActiveMerchant #:nodoc:
         super
       end
 
-      def authorize(money, payment, options={})
+      def authorize(money, options={})
         post = {}
 
         add_direct_debit_authorisation_data(post, money, options)

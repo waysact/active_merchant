@@ -5,7 +5,6 @@ class HsbcTest < Test::Unit::TestCase
     @gateway = HsbcGateway.new(fixtures(:hsbc))
 
     @amount = 100
-    @direct_debit = '123456789012'
     @options = {
       merchant_request_identification: '132c073c3cb81dd2fa471c7511a883',
       creditor_reference: 'CREDITOR_REFERENCE',
@@ -24,7 +23,7 @@ class HsbcTest < Test::Unit::TestCase
   def test_successful_authorisation
     @gateway.expects(:ssl_post).returns(successful_authorisation_response)
 
-    response = @gateway.authorize(@amount, @direct_debit, @options)
+    response = @gateway.authorize(@amount, @options)
     assert_success response
 
     assert_equal 'D2002091N014', response.authorization
@@ -35,7 +34,7 @@ class HsbcTest < Test::Unit::TestCase
   def test_failed_authorisation
     @gateway.expects(:ssl_post).returns(failed_authorisation_response)
 
-    response = @gateway.authorize(@amount, @direct_debit, @options)
+    response = @gateway.authorize(@amount, @options)
     assert_failure response
     assert_equal 'RJCT', response.error_code
   end
