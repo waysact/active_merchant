@@ -22,15 +22,16 @@ class RemoteHsbcTest < Test::Unit::TestCase
 
   def test_invalid_login
     gateway = HsbcGateway.new(
-      client_id: 'test_failure',
-      client_secret: 'eruliaf_tset',
-      profile_id: 'PC12345678',
-      public_key: 'NONE'
+      fixtures(:hsbc_remote).merge(
+        client_id: 'test_failure',
+        client_secret: 'test_failure'
+      )
     )
 
     response = gateway.authorize(@amount, @options)
     assert_failure response
-    assert_match "wrong client_id or client_secret", response.message
+    assert_equal "wrong client_id or client_secret", response.message
+    assert_equal "invalid_client", response.error_code
   end
 
   def test_successful_authorisation

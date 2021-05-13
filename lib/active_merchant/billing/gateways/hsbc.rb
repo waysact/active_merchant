@@ -180,7 +180,7 @@ module ActiveMerchant #:nodoc:
           ciphertext = decode_payload(response['ResponseBase64'])
           parse(decrypt_and_verify(ciphertext))
         else
-          response['Message']
+          response['Message'] || response['description']
         end
       end
 
@@ -202,7 +202,7 @@ module ActiveMerchant #:nodoc:
 
       def error_code_from(response)
         unless success_from(response)
-          response['Code']
+          response['error'] || response['Code']
         end
       end
     end
