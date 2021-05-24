@@ -36,6 +36,14 @@ Or, if you're using Bundler, just add the following to your Gemfile:
 
     gem 'activemerchant'
 
+### With Docker
+
+There is a simple Dockerfile to allow you to develop locally inside a container.
+To build it run `docker build --tag waysact/active_merchant .` then you can run
+the test suite:
+
+    docker run -it --rm -v "$PWD":/app waysact/active_merchant rake
+
 ## Usage
 
 This simple example demonstrates how a purchase can be made using a person's
