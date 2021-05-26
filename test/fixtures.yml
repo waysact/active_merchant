@@ -294,6 +294,9 @@ element:
   application_name: "Spreedly"
   application_version: "1"
 
+engaging_networks:
+  api_key: APIKEY
+
 # login: merchant number
 # password: referrer url (for authorize authentication)
 epay:
