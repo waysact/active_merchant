@@ -287,6 +287,8 @@ module ActiveMerchant #:nodoc:
         case e.response.code
         when '401'
           return Response.new(false, 'Invalid credentials', {}, test: test?)
+        else
+          raise
         end
       end
 
