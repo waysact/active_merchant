@@ -147,7 +147,7 @@ module ActiveMerchant #:nodoc:
       # Format: timestamp@fakeemail(custom_label).com
       def email(email, email_label)
         if email.blank?
-          "#{Time.now.to_i}@fakeemail#{email_label]}.com"
+          "#{Time.now.to_i}@fakeemail#{email_label}.com"
         else
           email
         end
