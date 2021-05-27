@@ -128,11 +128,7 @@ module ActiveMerchant #:nodoc:
       #
       # Format: timestamp@fakeemail(custom_label).com
       def email(email, email_label)
-        if email.blank?
-          "#{Time.now.to_i}@fakeemail#{email_label}.com"
-        else
-          email
-        end
+        email.blank? ? "#{Time.now.to_i}@fakeemail#{email_label}.com" : email
       end
 
       # private
@@ -274,7 +270,11 @@ module ActiveMerchant #:nodoc:
 
       # private
       def success_from(action, response)
-        action == 'auth' ? response.key?('ens-auth-token') : response['status'] == 'SUCCESS'
+        if action == 'auth'
+          response.key?('ens-auth-token')
+        else
+          response['status'] == 'SUCCESS'
+        end
       end
 
       # private
@@ -291,7 +291,11 @@ module ActiveMerchant #:nodoc:
 
       # private
       def authorization_from(action, response)
-        action == 'auth' ? response['ens-auth-token'] : response['transactionId']
+        if action == 'auth'
+          response['ens-auth-token']
+        else
+          response['transactionId']
+        end
       end
 
       # private
