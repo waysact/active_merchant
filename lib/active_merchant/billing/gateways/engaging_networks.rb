@@ -294,36 +294,24 @@ module ActiveMerchant #:nodoc:
 
       # private
       def success_from(action, response)
-        case action
-        when 'auth'
-          response.key?('ens-auth-token')
-        else
-          response['status'] == 'SUCCESS'
-        end
+        action == 'auth' ? response.key?('ens-auth-token') : response['status'] == 'SUCCESS'
       end
 
       # private
       def message_from(action, response)
-        case action
-        when 'auth'
+        case
+        when action == 'auth'
           response['ens-auth-token']
+        when !success_from(action, response)
+          response['error']
         else
-          if !success_from(action, response)
-            response['error']
-          else
-            "#{response['status']}|#{response['type']}"
-          end
+          "#{response['status']}|#{response['type']}"
         end
       end
 
       # private
       def authorization_from(action, response)
-        case action
-        when 'auth'
-          response['ens-auth-token']
-        else
-          response['transactionId']
-        end
+        action == 'auth' ? response['ens-auth-token'] : response['transactionId']
       end
 
       # private
@@ -331,12 +319,7 @@ module ActiveMerchant #:nodoc:
       # the `auth` call wants the body to be a string and not a JSON
       # structure
       def post_data(action, parameters = {})
-        case action
-        when 'auth'
-          parameters.to_s
-        else
-          parameters.to_json
-        end
+        action == 'auth' ? parameters.to_s : parameters.to_json
       end
 
       # private
