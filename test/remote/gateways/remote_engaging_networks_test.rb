@@ -63,11 +63,13 @@ class RemoteEngagingNetworksTest < Test::Unit::TestCase
         mobile_number: address[:phone],
         home_home: address[:phone]
       },
-      stay_informed_nature_news: 'Y',
-      get_involved_advocacy: 'Y',
-      get_involved_membership: 'Y',
-      get_involved_events: 'Y',
-      get_involved_volunteer: 'Y',
+      questions: {
+        'Stay Informed - Nature News': 'Y',
+        'Get Involved - Advocacy': 'Y',
+        'Get Involved - Events': 'Y',
+        'Get Involved - Membership': 'Y',
+        'Get Involved - Volunteer': 'Y'
+      },
       page_id: 78_936,
       appealcode: 'BBCRMSOURCECODE',
       txn7: "[EVG][123][#{SecureRandom.hex(15)}]"

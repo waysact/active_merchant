@@ -30,24 +30,6 @@ module ActiveMerchant #:nodoc:
         jcb: 'JC'
       }
 
-      # options for this metadata should have keys in lowercase
-      # as symbols, without punctuation, for example:
-      # 'Get Involved - Membership' -> :get_involved_membership
-      METADATA_QUESTIONS =
-        [
-          'Stay Informed - Nature News',
-          'Get Involved - Advocacy',
-          'Get Involved - Events',
-          'Get Involved - Membership',
-          'Get Involved - Volunteer',
-          'Mobile Text Opt In',
-          'Mobile Call Opt In',
-          'Home Phone Opt In',
-          'F2F-How do you identify',
-          'F2F-How was your experience',
-          'Tip Jar'
-        ].map { |s| [s.gsub(/\W+/, '_').downcase.to_sym, s] }.to_h.freeze
-
       def initialize(options = {})
         requires!(options, :api_key)
         super
@@ -155,13 +137,11 @@ module ActiveMerchant #:nodoc:
 
       # private
       #
-      # `questions` is a whole set of metadata, more like a survey
-      # however all the fields are hardcoded on the CRM side, thus
-      # why we use the constant to hold them.
+      # `questions` is a whole set of metadata, more like a survey however all
+      # the fields are hardcoded on the CRM side, thus whe expect the caller to
+      # know what they are, as they are configured by the customer
       def add_questions(options)
-        options.select do |k, v|
-          METADATA_QUESTIONS.values.include?(v)
-        end.map { |k, v| [METADATA_QUESTIONS[k], v] }.to_h
+        options[:questions]&.delete_if { |_, v| v.blank? }
       end
 
       # private
