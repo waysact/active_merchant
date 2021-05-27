@@ -128,7 +128,7 @@ module ActiveMerchant #:nodoc:
         customer = options[:customer]
         post['supporter'] =
           {
-            "Email Address": email(options[:email], options),
+            "Email Address": email(options[:email], options[:email_label]),
             "First Name": customer[:first_name],
             "Last Name": customer[:last_name],
             "Birthday yyyy mm dd":
@@ -145,9 +145,9 @@ module ActiveMerchant #:nodoc:
       # if there's no donor email.
       #
       # Format: timestamp@fakeemail(custom_label).com
-      def email(email, options)
+      def email(email, email_label)
         if email.blank?
-          "#{Time.now.to_i}@fakeemail#{options[:email_label]}.com"
+          "#{Time.now.to_i}@fakeemail#{email_label]}.com"
         else
           email
         end
