@@ -4,7 +4,7 @@ module ActiveMerchant #:nodoc:
   module Billing #:nodoc:
     class HsbcGateway < Gateway
       self.test_url = 'https://devcluster.api.p2g.netd2.hsbc.com.hk/cmb-connect-payments-pa-collection-cert-proxy/v1/direct-debits/'
-      self.live_url = 'https://example.com/live' # TODO
+      self.live_url = 'https://rbwm-api.hsbc.co.uk/cmb-connect-payments-pa-collection-prod-proxy/v1/direct-debits/'
 
       self.supported_countries = ['HK']
       self.default_currency = 'HKD'
