@@ -67,14 +67,16 @@ module ActiveMerchant #:nodoc:
       def add_payment(post, payment)
         if payment.respond_to?(:routing_number)
           post[:payment_method] = 'bank account'
-          post[:accType] = payment.account_type
-          post[:routingNum] = payment.routing_number
-          post[:accNum] = payment.account_number
+          post[:account_type] = payment.account_type
+          post[:routing_number] = payment.routing_number
+          post[:account_number] = payment.account_number
+          post[:confirm_account_number] = payment.account_number
         else
           post[:payment_method] = 'credit'
           post[:card_number] = payment.number
           post[:card_expiration_month] = payment.month
           post[:card_expiration_year] = format(payment.year, :four_digits)
+          post[:card_cvv] = payment.verification_value
         end
       end
 
