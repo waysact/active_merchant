@@ -34,7 +34,8 @@ module ActiveMerchant #:nodoc:
         transcript.
           gsub(%r((Authorization: Basic )\w+), '\1[FILTERED]').
           gsub(%r((&?api_key=)([a-zA-Z0-9]+)(&))i, '\1[FILTERED]\3').
-          gsub(%r((&?card_number=)(\d+)(&))i, '\1[FILTERED]\3')
+          gsub(%r((&?card_number=)(\d+)(&))i, '\1[FILTERED]\3').
+          gsub(%r((&?card_cvv=)(\d+)(&))i, '\1[FILTERED]\3')
       end
 
       private
