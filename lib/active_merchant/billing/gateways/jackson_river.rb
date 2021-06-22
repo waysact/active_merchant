@@ -63,6 +63,7 @@ module ActiveMerchant #:nodoc:
         post[:currency] = (options[:currency] || currency(money))
         post[:recurs_monthly] = 'recurs' if options[:recurring]
         post[:recurring_other_amount] = amount(money).to_s if options[:recurring]
+        post[:recurring_amount] = 'other' if options[:recurring]
       end
 
       def add_payment(post, payment)
