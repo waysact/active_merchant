@@ -159,6 +159,11 @@ card_stream:
 cardknox:
   api_key: ActiveMerchant_Test
 
+cardnet:
+  merchant_id: MERCHANT_ID
+  terminal_id: TERMINAL_ID
+  currency: CURRENCY
+
 # Working credentials, no need to replace
 cardprocess:
   user_id: 8a8294174e735d0c014e78beb6c5154f
