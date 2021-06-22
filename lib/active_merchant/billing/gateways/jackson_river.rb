@@ -84,6 +84,7 @@ module ActiveMerchant #:nodoc:
         post[:ms] = options[:market_source] if options[:market_source]
         post[:guid] = options[:guid] if options[:guid]
         post[:canvasser_name] = truncate(options[:canvasser_name], 100) if options[:canvasser_name]
+        post[:cid] = options[:cid] if options[:cid]
       end
 
       def parse(body)
