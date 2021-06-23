@@ -80,7 +80,7 @@ module ActiveMerchant #:nodoc:
 
       def add_metadata(post, options = {})
         post[:ms] = options[:market_source] if options[:market_source]
-        post[:guid] = options[:guid] if options[:guid]
+        post[:evergiving_unique_id] = options[:evergiving_unique_id] if options[:evergiving_unique_id]
         post[:canvasser_name] = truncate(options[:canvasser_name], 100) if options[:canvasser_name]
       end
 
