@@ -72,7 +72,9 @@ class RemoteEngagingNetworksTest < Test::Unit::TestCase
       },
       page_id: 78_936,
       appealcode: 'BBCRMSOURCECODE',
-      txn7: "[EVG][123][#{SecureRandom.hex(15)}]"
+      txn7: "[EVG][123][#{SecureRandom.hex(15)}]",
+      txn8: "FOO-BAR-ZZZZ",
+      othamt4: "Unrestricted"
     }
     response = @gateway.purchase(@amount, @credit_card, options)
     assert_success response

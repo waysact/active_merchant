@@ -171,7 +171,8 @@ module ActiveMerchant #:nodoc:
         txn = {
           "donationAmt": amount(amount),
           "recurrpay": empty?(options[:recurrfreq]) ? 'N' : 'Y',
-          "recurrfreq": options[:recurrfreq]
+          "recurrfreq": options[:recurrfreq],
+          "othamt4": options[:othamt4]
         }
         payment_details =
           if payment.respond_to?(:routing_number)
@@ -191,6 +192,11 @@ module ActiveMerchant #:nodoc:
             }
           end
 
+        # if we are processing a creditcard payment, we need to insert
+        # the cardholder name in the supporter hash
+        unless payment.respond_to?(:routing_number)
+          post['supporter'].merge!("Credit Card Holder Name": payment.name)
+        end
         post['transaction'] =
           txn.merge(payment_details).delete_if { |_, v| v.blank? }
       end
@@ -201,6 +207,7 @@ module ActiveMerchant #:nodoc:
       def add_metadata(post, options)
         post['appealCode'] = options[:appealcode]
         post['txn7'] = options[:txn7]
+        post['txn8'] = options[:txn8] unless empty?(options[:txn8])
       end
 
       # private
