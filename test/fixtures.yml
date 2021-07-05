@@ -308,6 +308,10 @@ epay:
   login: X
   password: Y
 
+epayco:
+  public_key: PUBLIC_KEY
+  private_key: PRIVATE_KEY
+
 evo_ca:
   username: demo
   password: password
