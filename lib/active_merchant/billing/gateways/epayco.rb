@@ -109,8 +109,8 @@ module ActiveMerchant #:nodoc:
           post[:cardExpYear] = payment.year.to_s
           post[:cardCvc] = payment.verification_value if payment
             .verification_value?
-        elsif options.key?(:bank_id)
-          post[:bank] = options[:bank_id]
+        elsif payment.is_a?(Check)
+          post[:bank] = payment.institution_number
         else
           post[:cardTokenId] = payment
         end

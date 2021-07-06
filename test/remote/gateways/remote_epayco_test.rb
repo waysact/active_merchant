@@ -11,6 +11,8 @@ class RemoteEpaycoTest < Test::Unit::TestCase
     @failed_card = credit_card('5170394490379427', { year: 2025, month: 12 })
     @pending_card = credit_card('373118856457642', { year: 2025, month: 12 })
 
+    @check = check(institution_number: '1022')
+
     @options = {
       client_id_type: 'CC',
       client_id_number: '312558586',
@@ -23,9 +25,7 @@ class RemoteEpaycoTest < Test::Unit::TestCase
     }
 
     @bank_options =
-      { bank_id: '1022', url_response: 'www.prueba.com', person_type: 1 }.merge(
-        @options
-      )
+      { url_response: 'www.prueba.com', person_type: 1 }.merge(@options)
   end
 
   def test_successful_purchase
@@ -69,8 +69,7 @@ class RemoteEpaycoTest < Test::Unit::TestCase
   end
 
   def test_pending_bank_purchase
-    payment = {}
-    response = @gateway.purchase(@amount, payment, @bank_options)
+    response = @gateway.purchase(@amount, @check, @bank_options)
 
     assert_success response
     assert_equal 'Pendiente', response.message
@@ -78,15 +77,14 @@ class RemoteEpaycoTest < Test::Unit::TestCase
   end
 
   def test_failed_bank_purchase
-    options_without_bank = @bank_options.except(:bank_id)
-    response = @gateway.purchase(@amount, nil, options_without_bank)
+    response = @gateway.purchase(@amount, check, @bank_options)
     assert_equal '500: field bank required', response.error_code
     assert_equal 'Error', response.message
   end
 
   def test_successful_bank_confirmation_status
     # Purchase with PSE information
-    response = @gateway.purchase(@amount, nil, @bank_options)
+    response = @gateway.purchase(@amount, @check, @bank_options)
     assert_equal 'Pendiente', response.message
 
     # Check status

@@ -21,9 +21,7 @@ class EpaycoTest < Test::Unit::TestCase
     }
 
     @bank_options =
-      { bank_id: '1022', url_response: 'www.prueba.com', person_type: 1 }.merge(
-        @options
-      )
+      { url_response: 'www.prueba.com', person_type: 1 }.merge(@options)
   end
 
   def test_successful_purchase
@@ -70,7 +68,7 @@ class EpaycoTest < Test::Unit::TestCase
     @gateway.expects(:ssl_request).returns(successful_purchase_pse_response)
     @gateway.expects(:access_token).returns('TOOKEN')
 
-    response = @gateway.purchase(@amount, {}, @options)
+    response = @gateway.purchase(@amount, check, @bank_options)
     assert_success response
 
     assert_equal '2212410', response.authorization
