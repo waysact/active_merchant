@@ -30,20 +30,9 @@ module ActiveMerchant #:nodoc:
         add_payment(post, payment, options)
         add_address_data(post, options)
         add_customer_data(post, options)
-
-        post[:urlResponse] = options[:url_response] if options.key?(
-          :url_response
-        )
-
         add_misc_data(post, options)
 
-        endpoint =
-          if payment.is_a?(CreditCard)
-            '/payment/process'
-          else
-            '/payment/process/pse'
-          end
-        commit(endpoint, post)
+        commit(purchase_endpoint(payment), post)
       end
 
       def bank_transaction_status(authorization)
@@ -89,12 +78,13 @@ module ActiveMerchant #:nodoc:
       end
 
       def add_address_data(post, options)
+        post[:country] = options.dig(:address, :country) || 'CO'
         post[:address] = options.dig(:address, :address1)
       end
 
       def add_invoice(post, money, options)
         post[:value] = amount(money)
-        post[:currency] = (options[:currency] || currency(money))
+        post[:currency] = (options[:currency] || currency(money)) || 'COP'
         post[:dues] = options.fetch(:dues, '1')
         post[:tax] = options[:tax] if options.key?(:tax)
         post[:taxBase] = options[:tax_base] if options.key?(:tax_base)
@@ -120,13 +110,15 @@ module ActiveMerchant #:nodoc:
         post[:urlConfirmation] = options[:url_confirmation] if options.key?(
           :url_confirmation
         )
+        post[:urlResponse] = options[:url_response] if options.key?(
+          :url_response
+        )
+        post[:methodConfimation] = options[:method_confirmation] || 'GET'
 
         (1..10).each do |i|
           key = "extra#{i}".to_sym
           post[key] = options[key] if options.key?(key)
         end
-
-        post[:methodConfimation] = options[:method_confirmation] || 'GET'
       end
 
       def parse(body)
@@ -154,6 +146,10 @@ module ActiveMerchant #:nodoc:
           test: test?,
           error_code: error_code_from(action, response)
         )
+      end
+
+      def purchase_endpoint(payment)
+        payment.is_a?(CreditCard) ? '/payment/process' : '/payment/process/pse'
       end
 
       def authorization_token(token_type)
